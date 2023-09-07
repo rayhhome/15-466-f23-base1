@@ -18,100 +18,115 @@ Load < Block > player_block(LoadTagDefault, []() -> Block * {
 	return new Block(data_path("assets/eye_idle.png"));
 });
 
-PlayMode::PlayMode() {
-	//TODO:
-	// you *must* use an asset pipeline of some sort to generate tiles.
-	// don't hardcode them like this!
-	// or, at least, if you do hardcode them like this,
-	//  make yourself a script that spits out the code that you paste in here
-	//   and check that script into your repository.
+Load < Block > player_block_up(LoadTagDefault, []() -> Block * {
+	return new Block(data_path("assets/eye_up.png"));
+});
 
-	//Also, *don't* use these tiles in your game:
+Load < Block > player_block_down(LoadTagDefault, []() -> Block * {
+	return new Block(data_path("assets/eye_down.png"));
+});
 
-	{ //use tiles 0-16 as some weird dot pattern thing:
-		std::array< uint8_t, 8*8 > distance;
-		for (uint32_t y = 0; y < 8; ++y) {
-			for (uint32_t x = 0; x < 8; ++x) {
-				float d = glm::length(glm::vec2((x + 0.5f) - 4.0f, (y + 0.5f) - 4.0f));
-				d /= glm::length(glm::vec2(4.0f, 4.0f));
-				distance[x+8*y] = uint8_t(std::max(0,std::min(255,int32_t( 255.0f * d ))));
-			}
-		}
-		for (uint32_t index = 0; index < 16; ++index) {
-			PPU466::Tile tile;
-			uint8_t t = uint8_t((255 * index) / 16);
-			for (uint32_t y = 0; y < 8; ++y) {
-				uint8_t bit0 = 0;
-				uint8_t bit1 = 0;
-				for (uint32_t x = 0; x < 8; ++x) {
-					uint8_t d = distance[x+8*y];
-					if (d > t) {
-						bit0 |= (1 << x);
-					} else {
-						bit1 |= (1 << x);
-					}
-				}
-				tile.bit0[y] = bit0;
-				tile.bit1[y] = bit1;
-			}
-			ppu.tile_table[index] = tile;
-		}
-	}
+Load < Block > player_block_left(LoadTagDefault, []() -> Block * {
+	return new Block(data_path("assets/eye_left.png"));
+});
 
-	Block player_setting = (*player_block);
-	size_t i = 0;
-	while (i < player_setting.sprites.size()) {
-		(ppu.tile_table[32].bit0)[i] = player_setting.sprites[i];
-		uint8_t x = player_setting.sprites[i];
-		std::bitset<8> a(x);
-		std::cout << a << std::endl;
+Load < Block > player_block_right(LoadTagDefault, []() -> Block * {
+	return new Block(data_path("assets/eye_right.png"));
+});
+
+Load < Block > player_block_left_up(LoadTagDefault, []() -> Block * {
+	return new Block(data_path("assets/eye_left_up.png"));
+});
+
+Load < Block > player_block_left_down(LoadTagDefault, []() -> Block * {
+	return new Block(data_path("assets/eye_left_down.png"));
+});
+
+Load < Block > player_block_right_up(LoadTagDefault, []() -> Block * {
+	return new Block(data_path("assets/eye_right_up.png"));
+});
+
+Load < Block > player_block_right_down(LoadTagDefault, []() -> Block * {
+	return new Block(data_path("assets/eye_right_down.png"));
+});
+
+Load < Block > background_block_1(LoadTagDefault, []() -> Block * {
+	return new Block(data_path("assets/back_1.png"));
+});
+
+Load < Block > background_block_2(LoadTagDefault, []() -> Block * {
+	return new Block(data_path("assets/back_2.png"));
+});
+
+Load < Block > goal_block(LoadTagDefault, []() -> Block * {
+	return new Block(data_path("assets/goal.png"));
+});
+
+Load < Block > mask_block(LoadTagDefault, []() -> Block * {
+	return new Block(data_path("assets/mask.png"));
+});
+
+Load < Block > enemy_block(LoadTagDefault, []() -> Block * {
+	return new Block(data_path("assets/enemy.png"));
+});
+
+void set_bit0(std::array< uint8_t, 8 > &bit0, std::vector< uint8_t > sprites) {
+	uint8_t i = 0;
+	while (i < sprites.size()) {
+		bit0[i] = sprites[i];
 		i += 1;
 	}
+};
 
-	//use sprite 32 as a "player":
-	ppu.tile_table[32].bit1 = {
-		0b00000000,
-		0b00000000,
-		0b00000000,
-		0b00000000,
-		0b00000000,
-		0b00000000,
-		0b00000000,
-		0b00000000,
+void set_bit1(std::array< uint8_t, 8 > &bit1) {
+	bit1 = {
+		0b0, 0b0, 0b0, 0b0,
+		0b0, 0b0, 0b0, 0b0
 	};
+};
 
-	//makes the outside of tiles 0-16 solid:
-	ppu.palette_table[0] = {
-		glm::u8vec4(0x00, 0x00, 0x00, 0x00),
-		glm::u8vec4(0x00, 0x00, 0x00, 0xff),
-		glm::u8vec4(0x00, 0x00, 0x00, 0x00),
-		glm::u8vec4(0x00, 0x00, 0x00, 0xff),
-	};
+PlayMode::PlayMode() {
+	// Tile/Sprite Configurations
+	// setting the background for the game
+	Block background_setting_1 = (*background_block_1);
+	Block background_setting_2 = (*background_block_2);
+	set_bit0(ppu.tile_table[0].bit0, background_setting_1.sprites);
+	set_bit1(ppu.tile_table[0].bit1);
+	set_bit0(ppu.tile_table[1].bit0, background_setting_2.sprites);
+	set_bit1(ppu.tile_table[1].bit1);
+	ppu.palette_table[0] = *(background_setting_1.palette);
+	
+	// setting the bits for the player
+	Block player_setting = (*player_block);
+	set_bit0(ppu.tile_table[32].bit0, player_setting.sprites);
+	set_bit1(ppu.tile_table[32].bit1);
+	ppu.palette_table[7] = *(player_setting.palette);
 
-	//makes the center of tiles 0-16 solid:
-	ppu.palette_table[1] = {
-		glm::u8vec4(0x00, 0x00, 0x00, 0x00),
-		glm::u8vec4(0x00, 0x00, 0x00, 0x00),
-		glm::u8vec4(0x00, 0x00, 0x00, 0xff),
-		glm::u8vec4(0x00, 0x00, 0x00, 0xff),
-	};
+	// setting the bits for the goal
+	Block goal_setting = (*goal_block);
+	set_bit0(ppu.tile_table[16].bit0, goal_setting.sprites);
+	set_bit1(ppu.tile_table[16].bit1);
+	ppu.palette_table[2] = *(goal_setting.palette);
 
-	//used for the player:
-	ppu.palette_table[7] = {
-		glm::u8vec4(0x00, 0x00, 0x00, 0x00),
-		glm::u8vec4(0xff, 0xff, 0x00, 0xff),
-		glm::u8vec4(0x00, 0x00, 0x00, 0xff),
-		glm::u8vec4(0x00, 0x00, 0x00, 0xff),
-	};
+	// setting the bits for the mask
+	Block mask_setting = (*mask_block);
+	set_bit0(ppu.tile_table[17].bit0, mask_setting.sprites);
+	set_bit1(ppu.tile_table[17].bit1);
+	ppu.palette_table[3] = *(mask_setting.palette);
 
-	//used for the misc other sprites:
-	ppu.palette_table[6] = {
-		glm::u8vec4(0x00, 0x00, 0x00, 0x00),
-		glm::u8vec4(0x88, 0x88, 0xff, 0xff),
-		glm::u8vec4(0x00, 0x00, 0x00, 0xff),
-		glm::u8vec4(0x00, 0x00, 0x00, 0x00),
-	};
+	// setting the bits for the enemies:
+	Block enemy_setting = (*enemy_block);
+	set_bit0(ppu.tile_table[33].bit0, enemy_setting.sprites);
+	set_bit1(ppu.tile_table[33].bit1);
+	ppu.palette_table[6] = *(enemy_setting.palette);
 
+	// enemy speed set up
+	for (size_t i = 0; i < MAXENEMY; i++) {
+		int x = rand() % MAXENEMY;
+		int y = rand() % MAXENEMY;
+		enemy_direc[i].x = (1.0f - (x % 2) * 2) * (x / 4.0f);
+		enemy_direc[i].y = (1.0f - (x % 2) * 2) * (y / 4.0f);
+	}
 }
 
 PlayMode::~PlayMode() {
@@ -157,63 +172,177 @@ bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 }
 
 void PlayMode::update(float elapsed) {
-
-	//slowly rotates through [0,1):
-	// (will be used to set background color)
-	background_fade += elapsed / 10.0f;
-	background_fade -= std::floor(background_fade);
-
-	constexpr float PlayerSpeed = 30.0f;
+	// player movements
+	constexpr float PlayerSpeed = 50.0f;
 	if (left.pressed) player_at.x -= PlayerSpeed * elapsed;
 	if (right.pressed) player_at.x += PlayerSpeed * elapsed;
 	if (down.pressed) player_at.y -= PlayerSpeed * elapsed;
 	if (up.pressed) player_at.y += PlayerSpeed * elapsed;
+
+	// player direction, controls sprites accordingly
+	bool up_direc = false;
+	bool down_direc = false;
+	bool left_direc = false;
+	bool right_direc = false;
+	if (left.pressed && !right.pressed) {
+		left_direc = true;
+	} else if (right.pressed && !left.pressed) {
+		right_direc = true;
+	}
+	if (up.pressed && !down.pressed) {
+		up_direc = true;
+	} else if (down.pressed && !up.pressed) {
+		down_direc = true;
+	}
+	bool horizontal = left_direc || right_direc;
+	bool vertical = up_direc || down_direc;
+	if (!horizontal && !vertical) {
+			set_bit0(ppu.tile_table[32].bit0, player_block->sprites);
+	} else if (!horizontal && vertical) {
+		if (up_direc) {
+			set_bit0(ppu.tile_table[32].bit0, player_block_up->sprites);
+		} else {
+			set_bit0(ppu.tile_table[32].bit0, player_block_down->sprites);
+		}
+	} else if (horizontal && !vertical) {
+		if (left_direc) {
+			set_bit0(ppu.tile_table[32].bit0, player_block_right->sprites);
+		} else {
+			set_bit0(ppu.tile_table[32].bit0, player_block_left->sprites);
+		}
+	} else {
+		if (left_direc && up_direc) {
+			set_bit0(ppu.tile_table[32].bit0, player_block_right_up->sprites);
+		} else if (left_direc && down_direc) {
+			set_bit0(ppu.tile_table[32].bit0, player_block_right_down->sprites);
+		} else if (right_direc && up_direc) {
+			set_bit0(ppu.tile_table[32].bit0, player_block_left_up->sprites);
+		} else if (right_direc && down_direc) {
+			set_bit0(ppu.tile_table[32].bit0, player_block_left_down->sprites);
+		}
+	}
 
 	//reset button press counters:
 	left.downs = 0;
 	right.downs = 0;
 	up.downs = 0;
 	down.downs = 0;
-}
 
-void PlayMode::draw(glm::uvec2 const &drawable_size) {
-	//--- set ppu state based on game state ---
-
-	//background color will be some hsv-like fade:
-	ppu.background_color = glm::u8vec4(
-		std::min(255,std::max(0,int32_t(255 * 0.5f * (0.5f + std::sin( 2.0f * M_PI * (background_fade + 0.0f / 3.0f) ) ) ))),
-		std::min(255,std::max(0,int32_t(255 * 0.5f * (0.5f + std::sin( 2.0f * M_PI * (background_fade + 1.0f / 3.0f) ) ) ))),
-		std::min(255,std::max(0,int32_t(255 * 0.5f * (0.5f + std::sin( 2.0f * M_PI * (background_fade + 2.0f / 3.0f) ) ) ))),
-		0xff
-	);
-
-	//tilemap gets recomputed every frame as some weird plasma thing:
-	//NOTE: don't do this in your game! actually make a map or something :-)
-	for (uint32_t y = 0; y < PPU466::BackgroundHeight; ++y) {
-		for (uint32_t x = 0; x < PPU466::BackgroundWidth; ++x) {
-			//TODO: make weird plasma thing
-			ppu.background[x+PPU466::BackgroundWidth*y] = ((x+y)%16);
+	// enemy movements
+	float EnemySpeed = 25.0f + (difficulty / 20) * 5.0f;
+	for (size_t i = 0; i < enemy_at.size(); i++) {
+		if (i % 2 == 1) {
+			enemy_at[i].x += EnemySpeed * enemy_direc[i].x * elapsed;
+		} else {
+			enemy_at[i].x -= EnemySpeed * enemy_direc[i].x * elapsed;
+		}
+		if ((i / 2) % 2 == 1) {
+			enemy_at[i].y += EnemySpeed * enemy_direc[i].y * elapsed;
+		} else {
+			enemy_at[i].y -= EnemySpeed * enemy_direc[i].y * elapsed;
+		}
+	}
+	
+	// enemy check
+	bool hit = false;
+	for (size_t i = 0; i < MAXENEMY; i++) {
+		if (player_at.x >= enemy_at[i].x - 8.0f &&
+			  player_at.x <= enemy_at[i].x + 8.0f &&
+				player_at.y >= enemy_at[i].y - 8.0f &&
+				player_at.y <= enemy_at[i].y + 8.0f) {
+					hit = true;
 		}
 	}
 
-	//background scroll:
-	ppu.background_position.x = int32_t(-0.5f * player_at.x);
-	ppu.background_position.y = int32_t(-0.5f * player_at.y);
+	if (hit) {
+		if (difficulty > 0) {
+			difficulty -= 1;
+		}
+	}
 
-	//player sprite:
+	// goal check
+	if (player_at.x >= goal_at.x - 8.0f && 
+		  player_at.x <= goal_at.x + 8.0f && 
+			player_at.y >= goal_at.y - 8.0f && 
+			player_at.y <= goal_at.y + 8.0f) {
+		if (difficulty < MAXDIFF) {
+			if (MAXDIFF - difficulty < 10) {
+				difficulty = MAXDIFF;
+			} else {
+				difficulty += 10;
+			}
+		}
+		goal_at.x = rand() % PPU466::ScreenWidth;
+		goal_at.y = rand() % PPU466::ScreenHeight;
+	}
+
+
+	// background movement period
+	background_period += elapsed * 3.0f;
+	if (background_period >= PPU466::BackgroundWidth) {
+		background_period -= PPU466::BackgroundWidth;
+	}
+
+	std::cout << "difficulty: " << difficulty << std::endl;
+}
+
+void PlayMode::draw(glm::uvec2 const &drawable_size) {
+	// some gbc like color:
+	ppu.background_color = glm::u8vec4(0x9b, 0xbc, 0x0f, 0xff);
+
+	// draw background:
+	for (uint32_t y = 0; y < PPU466::BackgroundHeight; ++y) {
+		for (uint32_t x = 0; x < PPU466::BackgroundWidth; ++x) {
+			ppu.background[x+PPU466::BackgroundWidth*y] = ((x + y) % 2);
+		}
+	}
+
+	// background scroll:
+	ppu.background_position.x = int32_t(-0.2f * player_at.x) + int32_t(background_period);
+	ppu.background_position.y = int32_t(-0.2f * player_at.y) + int32_t(background_period);
+
+  // mask sprites
+	uint32_t mask_level = 1 + uint32_t(difficulty / 20.0f);
+	size_t cnt = 0;
+	for (uint32_t i = 0; i < mask_level; ++i) {
+		for (uint32_t j = 0; j < mask_level - i; ++j) {
+			ppu.sprites[10+cnt].x = int8_t(player_at.x+j);
+			ppu.sprites[10+cnt+1].x = int8_t(player_at.x-j);
+			ppu.sprites[10+cnt].y = int8_t(player_at.y+i);
+			ppu.sprites[10+cnt+1].y = int8_t(player_at.y-i);
+			ppu.sprites[10+cnt].index = 17;
+			ppu.sprites[10+cnt+1].index = 17;
+			ppu.sprites[10+cnt].attributes = 3;
+			ppu.sprites[10+cnt+1].attributes = 3;
+			ppu.sprites[10+cnt].attributes |= 0x80; //'behind' bit
+			ppu.sprites[10+cnt+1].attributes |= 0x80; //'behind' bit
+			cnt += 2;
+		}
+	}
+
+	// player sprite:
 	ppu.sprites[0].x = int8_t(player_at.x);
 	ppu.sprites[0].y = int8_t(player_at.y);
 	ppu.sprites[0].index = 32;
 	ppu.sprites[0].attributes = 7;
 
-	//some other misc sprites:
-	for (uint32_t i = 1; i < 63; ++i) {
-		float amt = (i + 2.0f * background_fade) / 62.0f;
-		ppu.sprites[i].x = int8_t(0.5f * PPU466::ScreenWidth + std::cos( 2.0f * M_PI * amt * 5.0f + 0.01f * player_at.x) * 0.4f * PPU466::ScreenWidth);
-		ppu.sprites[i].y = int8_t(0.5f * PPU466::ScreenHeight + std::sin( 2.0f * M_PI * amt * 3.0f + 0.01f * player_at.y) * 0.4f * PPU466::ScreenWidth);
-		ppu.sprites[i].index = 32;
-		ppu.sprites[i].attributes = 6;
-		if (i % 2) ppu.sprites[i].attributes |= 0x80; //'behind' bit
+	// goal sprite:
+	ppu.sprites[1].x = int8_t(goal_at.x);
+	ppu.sprites[1].y = int8_t(goal_at.y);
+	ppu.sprites[1].index = 16;
+	ppu.sprites[1].attributes = 2;
+
+	// enemy sprites:
+	for (size_t i = 0; i < MAXENEMY; ++i) {
+		ppu.sprites[i+2].x = int8_t(enemy_at[i].x);
+		ppu.sprites[i+2].y = int8_t(enemy_at[i].y);
+		ppu.sprites[i+2].index = 33;
+		ppu.sprites[i+2].attributes = 6;
+		ppu.sprites[i+2].attributes |= 0x80; //'behind' bit
+	}
+
+	for (size_t i = 10 + cnt; i < 64; ++i) {
+		ppu.sprites[i].y = 250;
 	}
 
 	//--- actually draw ---

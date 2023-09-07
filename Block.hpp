@@ -17,14 +17,16 @@
 
 // Notes:
 // - Blocks will be made as png images
-// - There are three types of Movable Blocks: player, enemy, and goal (for now)
+// - There are four types of Blocks: player, enemy, goal, and background
 // - Some blocks might be represented by multiple sprites.
   
 // Restrict the type of the block
 enum block_type : uint8_t {
   PLAYER_BLOCK,
   ENEMY_BLOCK,
-  GOAL_BLOCK
+  GOAL_BLOCK,
+  BACK_BLOCK,
+  MASK_BLOCK
 };
 
 struct Block {
@@ -54,23 +56,38 @@ struct Block {
     }
     assert(sprites.size() == 8 && "The number of sprites is not 8");
 
-    // set the type of the block
+    // set the type and palette of the block
+    palette = new std::array< glm::u8vec4, 4 >;
     if (path.find("eye") != std::string::npos) {
       type = PLAYER_BLOCK;
+      (*palette)[0] = glm::u8vec4(0x00, 0x00, 0x00, 0x00);
+      (*palette)[1] = glm::u8vec4(0x0f, 0x38, 0x0f, 0xff);
+      (*palette)[2] = glm::u8vec4(0x00, 0x00, 0x00, 0xff);
+      (*palette)[3] = glm::u8vec4(0x00, 0x00, 0x00, 0xff);
     } else if (path.find("enemy") != std::string::npos) {
       type = ENEMY_BLOCK;
+      (*palette)[0] = glm::u8vec4(0x00, 0x00, 0x00, 0x00);
+      (*palette)[1] = glm::u8vec4(0x0f, 0x38, 0x0f, 0xff);
+      (*palette)[2] = glm::u8vec4(0x00, 0x00, 0x00, 0xff);
+      (*palette)[3] = glm::u8vec4(0x00, 0x00, 0x00, 0xff);
     } else if (path.find("goal") != std::string::npos) {
       type = GOAL_BLOCK;
+      (*palette)[0] = glm::u8vec4(0x00, 0x00, 0x00, 0x00);
+      (*palette)[1] = glm::u8vec4(0x30, 0x62, 0x30, 0xff);
+      (*palette)[2] = glm::u8vec4(0x00, 0x00, 0x00, 0xff);
+      (*palette)[3] = glm::u8vec4(0x00, 0x00, 0x00, 0xff);
+    } else if (path.find("mask") != std::string::npos) {
+      (*palette)[0] = glm::u8vec4(0x00, 0x00, 0x00, 0x00);
+      (*palette)[1] = glm::u8vec4(0x30, 0x62, 0x30, 0xff);
+      (*palette)[2] = glm::u8vec4(0x00, 0x00, 0x00, 0xff);
+      (*palette)[3] = glm::u8vec4(0x00, 0x00, 0x00, 0xff);
     } else {
-      assert(false && "Undefined block type");
+      type = BACK_BLOCK;
+      (*palette)[0] = glm::u8vec4(0x00, 0x00, 0x00, 0x00);
+      (*palette)[1] = glm::u8vec4(0x8b, 0xac, 0x0f, 0xff);
+      (*palette)[2] = glm::u8vec4(0x00, 0x00, 0x00, 0xff);
+      (*palette)[3] = glm::u8vec4(0x00, 0x00, 0x00, 0xff);
     }
-
-    // set the palette
-    palette = new std::array< glm::u8vec4, 4 >;
-    (*palette)[0] = glm::u8vec4(0x00, 0x00, 0x00, 0x00);
-    (*palette)[1] = glm::u8vec4(0x00, 0x00, 0x00, 0xff);
-    (*palette)[2] = glm::u8vec4(0x00, 0x00, 0x00, 0xff);
-    (*palette)[3] = glm::u8vec4(0x00, 0x00, 0x00, 0xff);
   }
 
   // A block might be represented by multiple sprites (e.g. the eyeball!)

@@ -1,22 +1,26 @@
-# (TODO: your game's title)
+# SeeK the Game
 
-Author: (TODO: your name)
+Author: Sirui Huang
 
-Design: (TODO: In two sentences or fewer, describe what is new and interesting about your game.)
+Design: People tend to omit the danger around them... Particularly in this game. You control an animatic eyeball to dodge spike balls and reach goals, although you surroundings will starts to get masked and you have to predict where to dodge.
 
 Screen Shot:
 
 ![Screen Shot](screenshot.png)
 
 How Your Asset Pipeline Works:
+The asset pipeline read png images from ~/dist/assets and read them as patterns to draw with the ppu466. The filenames are 
+read to determine which type of assets the files fall into. Below is the avatar you'll controll!
 
-(TODO: describe the steps in your asset pipeline, from source files to tiles/backgrounds/whatever you upload to the PPU466.)
-
-(TODO: make sure the source files you drew are included. You can [link](your/file.png) to them to be a bit fancier.)
+![Eyeball](/dist/assets/eye_idle.png)
 
 How To Play:
+Control the eyeball with arrow keys and avoid the spike balls. Look for this:
 
-(TODO: describe the controls and (if needed) goals/strategy.)
+![Goal](/dist/assets/goal.png)
+
+Contacting it will ramp up the difficulty. With higher difficulty, your avatar will be masked with more shadowy region and
+spike balls will move faster. 
 
 This game was built with [NEST](NEST.md).
 
