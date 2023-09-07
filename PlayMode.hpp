@@ -34,15 +34,15 @@ struct PlayMode : Mode {
 	glm::vec2 goal_at = glm::vec2(PPU466::ScreenWidth/2.0f, PPU466::ScreenHeight/4.0f);
 
 	//enemy position:
-
-	std::array< glm::vec2, MAXENEMY > enemy_at = {glm::vec2(PPU466::ScreenWidth/4.0f,      PPU466::ScreenHeight/4.0f),
-																         glm::vec2(PPU466::ScreenWidth/4.0f,      PPU466::ScreenHeight/2.0f),
-																         glm::vec2(PPU466::ScreenWidth/2.0f,      PPU466::ScreenHeight/4.0f),
-																         glm::vec2(PPU466::ScreenWidth*3.0f/4.0f, PPU466::ScreenHeight/4.0f),
-																         glm::vec2(PPU466::ScreenWidth/4.0f,      PPU466::ScreenHeight*3.0f/4.0f),
-																         glm::vec2(PPU466::ScreenWidth*3.0f/4.0f, PPU466::ScreenHeight/2.0f),
-																         glm::vec2(PPU466::ScreenWidth/2.0f,      PPU466::ScreenHeight*3.0f/4.0f),
-																         glm::vec2(PPU466::ScreenWidth*3.0f/4.0f, PPU466::ScreenHeight*3.0f/4.0f)};
+	std::array< glm::vec2, MAXENEMY > enemy_at = {
+		glm::vec2(PPU466::ScreenWidth/4.0f,      PPU466::ScreenHeight/4.0f),
+		glm::vec2(PPU466::ScreenWidth/4.0f,      PPU466::ScreenHeight/2.0f),
+		glm::vec2(PPU466::ScreenWidth/2.0f,      PPU466::ScreenHeight/4.0f),
+		glm::vec2(PPU466::ScreenWidth*3.0f/4.0f, PPU466::ScreenHeight/4.0f),
+		glm::vec2(PPU466::ScreenWidth/4.0f,      PPU466::ScreenHeight*3.0f/4.0f),
+		glm::vec2(PPU466::ScreenWidth*3.0f/4.0f, PPU466::ScreenHeight/2.0f),
+		glm::vec2(PPU466::ScreenWidth/2.0f,      PPU466::ScreenHeight*3.0f/4.0f),
+		glm::vec2(PPU466::ScreenWidth*3.0f/4.0f, PPU466::ScreenHeight*3.0f/4.0f)};
 
 	std::array< glm::vec2, MAXENEMY > enemy_direc;
 
