@@ -1,12 +1,22 @@
 #include "PlayMode.hpp"
 
+#include "data_path.hpp"
 //for the GL_ERRORS() macro:
 #include "gl_errors.hpp"
 
 //for glm::value_ptr() :
 #include <glm/gtc/type_ptr.hpp>
 
+#include "Block.hpp"
+#include "Load.hpp"
 #include <random>
+
+#include <stdio.h>
+#include <bitset>
+
+Load < Block > player_block(LoadTagDefault, []() -> Block * {
+	return new Block(data_path("assets/eye_idle.png"));
+});
 
 PlayMode::PlayMode() {
 	//TODO:
@@ -48,24 +58,24 @@ PlayMode::PlayMode() {
 		}
 	}
 
+	Block player_setting = (*player_block);
+	size_t i = 0;
+	while (i < player_setting.sprites.size()) {
+		(ppu.tile_table[32].bit0)[i] = player_setting.sprites[i];
+		uint8_t x = player_setting.sprites[i];
+		std::bitset<8> a(x);
+		std::cout << a << std::endl;
+		i += 1;
+	}
+
 	//use sprite 32 as a "player":
-	ppu.tile_table[32].bit0 = {
-		0b01111110,
-		0b11111111,
-		0b11111111,
-		0b11111111,
-		0b11111111,
-		0b11111111,
-		0b11111111,
-		0b01111110,
-	};
 	ppu.tile_table[32].bit1 = {
 		0b00000000,
 		0b00000000,
-		0b00011000,
-		0b00100100,
 		0b00000000,
-		0b00100100,
+		0b00000000,
+		0b00000000,
+		0b00000000,
 		0b00000000,
 		0b00000000,
 	};
