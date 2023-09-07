@@ -1,6 +1,8 @@
 # SeeK the Game
 
-Author: Sirui Huang
+NOTE: The newest commit comes after the assignment deadline. For grading, please look at the commit "harder enemies".
+
+Author: Sirui Huang (siruih)
 
 Design: People tend to omit the danger around them... Particularly in this game. You control an animatic eyeball to dodge spike balls and reach goals, although you surroundings will starts to get masked and you have to predict where to dodge.
 

@@ -50,6 +50,10 @@ Load < Block > player_block_right_down(LoadTagDefault, []() -> Block * {
 	return new Block(data_path("assets/eye_right_down.png"));
 });
 
+Load < Block > player_block_hurt(LoadTagDefault, []() -> Block * {
+	return new Block(data_path("assets/eye_hurt.png"));
+});
+
 Load < Block > background_block_1(LoadTagDefault, []() -> Block * {
 	return new Block(data_path("assets/back_1.png"));
 });
@@ -179,46 +183,63 @@ void PlayMode::update(float elapsed) {
 	if (down.pressed) player_at.y -= PlayerSpeed * elapsed;
 	if (up.pressed) player_at.y += PlayerSpeed * elapsed;
 
+	if (player_at.x > PPU466::ScreenWidth) {
+		player_at.x -= PPU466::ScreenWidth;
+	} 
+	if (player_at.x < 0) {
+		player_at.x += PPU466::ScreenWidth;
+	}
+	if (player_at.y > PPU466::ScreenHeight) {
+		player_at.y -= PPU466::ScreenHeight;
+	}
+	if (player_at.y < 0) {
+		player_at.y += PPU466::ScreenHeight;
+	}
+
 	// player direction, controls sprites accordingly
-	bool up_direc = false;
-	bool down_direc = false;
-	bool left_direc = false;
-	bool right_direc = false;
-	if (left.pressed && !right.pressed) {
-		left_direc = true;
-	} else if (right.pressed && !left.pressed) {
-		right_direc = true;
-	}
-	if (up.pressed && !down.pressed) {
-		up_direc = true;
-	} else if (down.pressed && !up.pressed) {
-		down_direc = true;
-	}
-	bool horizontal = left_direc || right_direc;
-	bool vertical = up_direc || down_direc;
-	if (!horizontal && !vertical) {
-			set_bit0(ppu.tile_table[32].bit0, player_block->sprites);
-	} else if (!horizontal && vertical) {
-		if (up_direc) {
-			set_bit0(ppu.tile_table[32].bit0, player_block_up->sprites);
-		} else {
-			set_bit0(ppu.tile_table[32].bit0, player_block_down->sprites);
+	if (hit) {
+		set_bit0(ppu.tile_table[32].bit0, player_block_hurt->sprites);
+	}	else {
+		bool up_direc = false;
+		bool down_direc = false;
+		bool left_direc = false;
+		bool right_direc = false;
+		if (left.pressed && !right.pressed) {
+			left_direc = true;
+		} else if (right.pressed && !left.pressed) {
+			right_direc = true;
 		}
-	} else if (horizontal && !vertical) {
-		if (left_direc) {
-			set_bit0(ppu.tile_table[32].bit0, player_block_right->sprites);
-		} else {
-			set_bit0(ppu.tile_table[32].bit0, player_block_left->sprites);
+		if (up.pressed && !down.pressed) {
+			up_direc = true;
+		} else if (down.pressed && !up.pressed) {
+			down_direc = true;
 		}
-	} else {
-		if (left_direc && up_direc) {
-			set_bit0(ppu.tile_table[32].bit0, player_block_right_up->sprites);
-		} else if (left_direc && down_direc) {
-			set_bit0(ppu.tile_table[32].bit0, player_block_right_down->sprites);
-		} else if (right_direc && up_direc) {
-			set_bit0(ppu.tile_table[32].bit0, player_block_left_up->sprites);
-		} else if (right_direc && down_direc) {
-			set_bit0(ppu.tile_table[32].bit0, player_block_left_down->sprites);
+		bool horizontal = left_direc || right_direc;
+		bool vertical = up_direc || down_direc;
+		if (!horizontal && !vertical) {
+				set_bit0(ppu.tile_table[32].bit0, player_block->sprites);
+		} else if (!horizontal && vertical) {
+			if (up_direc) {
+				set_bit0(ppu.tile_table[32].bit0, player_block_up->sprites);
+			} else {
+				set_bit0(ppu.tile_table[32].bit0, player_block_down->sprites);
+			}
+		} else if (horizontal && !vertical) {
+			if (left_direc) {
+				set_bit0(ppu.tile_table[32].bit0, player_block_right->sprites);
+			} else {
+				set_bit0(ppu.tile_table[32].bit0, player_block_left->sprites);
+			}
+		} else {
+			if (left_direc && up_direc) {
+				set_bit0(ppu.tile_table[32].bit0, player_block_right_up->sprites);
+			} else if (left_direc && down_direc) {
+				set_bit0(ppu.tile_table[32].bit0, player_block_right_down->sprites);
+			} else if (right_direc && up_direc) {
+				set_bit0(ppu.tile_table[32].bit0, player_block_left_up->sprites);
+			} else if (right_direc && down_direc) {
+				set_bit0(ppu.tile_table[32].bit0, player_block_left_down->sprites);
+			}
 		}
 	}
 
@@ -229,7 +250,7 @@ void PlayMode::update(float elapsed) {
 	down.downs = 0;
 
 	// enemy movements
-	float EnemySpeed = 25.0f + (difficulty / 10) * 5.0f;
+	float EnemySpeed = 15.0f + (difficulty / 10) * 10.0f;
 	for (size_t i = 0; i < enemy_at.size(); i++) {
 		if (i % 2 == 1) {
 			enemy_at[i].x += EnemySpeed * enemy_direc[i].x * elapsed;
@@ -241,24 +262,47 @@ void PlayMode::update(float elapsed) {
 		} else {
 			enemy_at[i].y -= EnemySpeed * enemy_direc[i].y * elapsed;
 		}
-	}
-	
-	// enemy check
-	hit = false;
-	for (size_t i = 0; i < MAXENEMY; i++) {
-		if (player_at.x >= enemy_at[i].x - 8.0f &&
-			  player_at.x <= enemy_at[i].x + 8.0f &&
-				player_at.y >= enemy_at[i].y - 8.0f &&
-				player_at.y <= enemy_at[i].y + 8.0f) {
-					hit = true;
+		if (enemy_at[i].x > PPU466::ScreenWidth) {
+			enemy_at[i].x -= PPU466::ScreenWidth;
+		} 
+		if (enemy_at[i].x < 0) {
+			enemy_at[i].x += PPU466::ScreenWidth;
+		}
+		if (enemy_at[i].y > PPU466::ScreenHeight) {
+			enemy_at[i].y -= PPU466::ScreenHeight;
+		}
+		if (enemy_at[i].y < 0) {
+			enemy_at[i].y += PPU466::ScreenHeight;
 		}
 	}
 
-	if (hit) {
-		std::cout << "hit" << std::endl;
-		if (difficulty > 0) {
-			difficulty -= 1;
+	// enemy check
+	bool just_hit = false;
+	if (!hit) {
+		for (size_t i = 0; i < MAXENEMY; i++) {
+			if (player_at.x >= enemy_at[i].x - 8.0f &&
+					player_at.x <= enemy_at[i].x + 8.0f &&
+					player_at.y >= enemy_at[i].y - 8.0f &&
+					player_at.y <= enemy_at[i].y + 8.0f) {
+						hit = true;
+						just_hit = true;
+						hit_gauge = 0.0f;
+						if (difficulty > 0) {
+							difficulty -= 10;
+						}
+						break;
+			}
 		}
+	}
+
+	// difficulty check
+	if (hit && !just_hit) {
+		hit_gauge += elapsed;
+	}
+
+	if (hit && hit_gauge >= 1.0f) {
+		hit_gauge = 0.0f;
+		hit = false;
 	}
 
 	// goal check
@@ -283,6 +327,7 @@ void PlayMode::update(float elapsed) {
 	if (background_period >= PPU466::BackgroundWidth) {
 		background_period -= PPU466::BackgroundWidth;
 	}
+
 }
 
 void PlayMode::draw(glm::uvec2 const &drawable_size) {
@@ -301,21 +346,24 @@ void PlayMode::draw(glm::uvec2 const &drawable_size) {
 	ppu.background_position.y = int32_t(-0.2f * player_at.y) + int32_t(background_period);
 
   // mask sprites
-	uint32_t mask_level = 1 + uint32_t(difficulty / 20.0f);
+	uint32_t mask_level = uint32_t(difficulty / 20.0f);
 	size_t cnt = 0;
-	for (uint32_t i = 0; i < mask_level; ++i) {
-		for (uint32_t j = 0; j < mask_level - i; ++j) {
-			ppu.sprites[10+cnt].x = int8_t(player_at.x+j);
-			ppu.sprites[10+cnt+1].x = int8_t(player_at.x-j);
-			ppu.sprites[10+cnt].y = int8_t(player_at.y+i);
-			ppu.sprites[10+cnt+1].y = int8_t(player_at.y-i);
-			ppu.sprites[10+cnt].index = 17;
-			ppu.sprites[10+cnt+1].index = 17;
-			ppu.sprites[10+cnt].attributes = 3;
-			ppu.sprites[10+cnt+1].attributes = 3;
-			ppu.sprites[10+cnt].attributes |= 0x80; //'behind' bit
-			ppu.sprites[10+cnt+1].attributes |= 0x80; //'behind' bit
-			cnt += 2;
+	for (uint8_t i = 0; i < mask_level; ++i) {
+		for (uint8_t j = 0; j < mask_level - i; ++j) {
+			ppu.sprites[10+cnt].x = int8_t(player_at.x+j*8.0f);
+			ppu.sprites[10+cnt+1].x = int8_t(player_at.x-j*8.0f);
+			ppu.sprites[10+cnt+2].x = int8_t(player_at.x+j*8.0f);
+			ppu.sprites[10+cnt+3].x = int8_t(player_at.x-j*8.0f);
+			ppu.sprites[10+cnt].y = int8_t(player_at.y+i*8.0f);
+			ppu.sprites[10+cnt+1].y = int8_t(player_at.y-i*8.0f);
+			ppu.sprites[10+cnt+2].y = int8_t(player_at.y-i*8.0f);
+			ppu.sprites[10+cnt+3].y = int8_t(player_at.y+i*8.0f);
+			for (size_t k = 0; k < 4; ++k) {
+				ppu.sprites[10+cnt+k].index = 17;
+				ppu.sprites[10+cnt+k].attributes = 3;
+				ppu.sprites[10+cnt+k].attributes |= 0x80; //'behind' bit
+			}
+			cnt += 4;
 		}
 	}
 
@@ -339,7 +387,6 @@ void PlayMode::draw(glm::uvec2 const &drawable_size) {
 		ppu.sprites[i+2].attributes = 6;
 		ppu.sprites[i+2].attributes |= 0x80; //'behind' bit
 	}
-
 	for (size_t i = 10 + cnt; i < 64; ++i) {
 		ppu.sprites[i].y = 250;
 	}
