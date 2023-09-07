@@ -52,6 +52,9 @@ struct PlayMode : Mode {
 	//difficulty: decides the scale of the mask
 	uint16_t difficulty = 0;
 
+	//hit?
+	bool hit = false;
+
 	//----- drawing handled by PPU466 -----
 
 	PPU466 ppu;

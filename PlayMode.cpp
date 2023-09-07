@@ -229,7 +229,7 @@ void PlayMode::update(float elapsed) {
 	down.downs = 0;
 
 	// enemy movements
-	float EnemySpeed = 25.0f + (difficulty / 20) * 5.0f;
+	float EnemySpeed = 25.0f + (difficulty / 10) * 5.0f;
 	for (size_t i = 0; i < enemy_at.size(); i++) {
 		if (i % 2 == 1) {
 			enemy_at[i].x += EnemySpeed * enemy_direc[i].x * elapsed;
@@ -244,7 +244,7 @@ void PlayMode::update(float elapsed) {
 	}
 	
 	// enemy check
-	bool hit = false;
+	hit = false;
 	for (size_t i = 0; i < MAXENEMY; i++) {
 		if (player_at.x >= enemy_at[i].x - 8.0f &&
 			  player_at.x <= enemy_at[i].x + 8.0f &&
@@ -255,6 +255,7 @@ void PlayMode::update(float elapsed) {
 	}
 
 	if (hit) {
+		std::cout << "hit" << std::endl;
 		if (difficulty > 0) {
 			difficulty -= 1;
 		}
@@ -282,8 +283,6 @@ void PlayMode::update(float elapsed) {
 	if (background_period >= PPU466::BackgroundWidth) {
 		background_period -= PPU466::BackgroundWidth;
 	}
-
-	std::cout << "difficulty: " << difficulty << std::endl;
 }
 
 void PlayMode::draw(glm::uvec2 const &drawable_size) {
